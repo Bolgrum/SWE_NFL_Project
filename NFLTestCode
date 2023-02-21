@@ -1,0 +1,33 @@
+'''
+Created on Feb 16, 2023
+
+@author: Anthony Braden
+'''
+import csv
+
+def game_data(home_team, away_team):
+    home_bonus = 48
+    with open('Data Set.csv', newline='') as f:
+        csv_file = csv.reader(f)
+        for row in csv_file:
+            if home_team == row[0]:
+                elo_home = int(row[3]) + home_bonus
+            elif away_team == row[0]:
+                elo_away = int(row[3])
+        elo_difference = elo_home - elo_away
+        return elo_difference
+        
+    
+def run_data(elo_dif): 
+    if elo_dif >=0:
+        odds_home_team_wins = ((1-(1/(10*(elo_dif/400)+1)))*100)
+    else:
+        odds_home_team_wins = (abs(1/(10*(elo_dif/400)+1))*100)
+    odds_home_team_wins = round(odds_home_team_wins, 2)
+    return odds_home_team_wins
+
+home_team = input("Home Team: ")
+away_team = input("Away Team: ")
+elo_dif = game_data(home_team, away_team)
+odds_home_team_wins = run_data(elo_dif)
+print("The " + home_team + " have a " + str(odds_home_team_wins) + "% chance to beat the " + away_team + ".")
