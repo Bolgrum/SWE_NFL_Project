@@ -1,0 +1,38 @@
+'''
+This code was entirely generated, debugged, and source from ChatGPT, a large language model trained by OpenAI, based on the GPT-3.5 architecture using parameters and guidance from team member Anthony Braden
+'''
+
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+import pickle
+import numpy as np
+
+nfl_data = pd.read_csv('nfl_data.csv')
+
+features = ['elo1_pre', 'elo2_pre', 'result']
+
+le = LabelEncoder()
+nfl_data['result'] = le.fit_transform(nfl_data['result'])
+
+X_train, X_test, y_train, y_test = train_test_split(nfl_data[features], nfl_data['result'], test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train[['elo1_pre', 'elo2_pre']], y_train)
+
+y_pred = model.predict(X_test[['elo1_pre', 'elo2_pre']])
+error = np.mean(np.abs(np.where(y_test != 0, (y_test - y_pred) / y_test, 0))) * 100
+print("Model error: {:.2f}%".format(error))
+
+if error < 20:
+    with open('model.pkl', 'wb') as f:
+        pickle.dump(model, f)
+
+with open('model.pkl', 'rb') as f:
+    model = pickle.load(f)
+
+team1_elo = float(input("Enter team 1's elo rating: "))
+team2_elo = float(input("Enter team 2's elo rating: "))
+result = model.predict([[team1_elo, team2_elo]])
+print("Predicted result: {}".format("Win" if result > 0.5 else "Loss"))
